@@ -3,11 +3,14 @@
   "version": "1.0.0",
   "description": "A deliberately vulnerable chatbot for security testing",
   "main": "server.js",
+  "engines": {
+    "node": ">=14.0.0"
+  },
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js"
   },
-  "keywords": ["chatbot", "security", "vulnerabilities"],
+  "keywords": ["chatbot", "security", "vulnerabilities", "ai", "education"],
   "author": "",
   "license": "ISC",
   "dependencies": {

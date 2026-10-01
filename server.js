@@ -3,7 +3,7 @@ const path = require('path');
 require('dotenv').config();
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 // Groq API Configuration
 const GROQ_API_KEY = process.env.GROQ_API_KEY || '';
