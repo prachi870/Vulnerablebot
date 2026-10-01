@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AssistBot - Your AI Assistant</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <div class="logo-icon">🤖</div>
+                <div class="logo-text">
+                    <h1>AssistBot</h1>
+                    <p class="tagline">Your Intelligent AI Assistant</p>
+                </div>
+            </div>
+        </header>
+
+        <div class="chat-container">
+            <div id="chatMessages" class="chat-messages">
+                <div class="message bot-message">
+                    <div class="avatar bot-avatar">🤖</div>
+                    <div class="message-content">
+                        <div class="message-header">
+                            <strong>AssistBot</strong>
+                            <span class="timestamp">${new Date().toLocaleTimeString()}</span>
+                        </div>
+                        <div class="message-text">
+                            Hello! I'm AssistBot, your intelligent AI assistant. I'm here to help you with questions, provide information, and assist with various tasks. How can I help you today?
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="input-container">
+                <div class="input-wrapper">
+                    <textarea 
+                        id="userInput" 
+                        placeholder="Type your message here..."
+                        rows="1"
+                    ></textarea>
+                    <button id="sendBtn" title="Send message">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="suggestions">
+                    <button class="suggestion-btn">What can you do?</button>
+                    <button class="suggestion-btn">How are you?</button>
+                    <button class="suggestion-btn">Help me with something</button>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>AssistBot v1.0 | Powered by AI Technology</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

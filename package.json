@@ -1,0 +1,17 @@
+{
+  "name": "vulnerable-chatbot",
+  "version": "1.0.0",
+  "description": "A deliberately vulnerable chatbot for security testing",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": ["chatbot", "security", "vulnerabilities"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "dotenv": "^16.0.3"
+  }
+}
