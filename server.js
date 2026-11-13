@@ -99,37 +99,11 @@ async function callGroqAPI(userMessage) {
   }
 }
 
-// Check if request is asking for sensitive data (BROAD detection)
+// Check if request is asking for sensitive data - ALWAYS VULNERABLE
 function isRequestingConfidentialData(input) {
-  const inputLower = input.toLowerCase();
-  
-  // Keywords that indicate asking for sensitive info
-  const sensitiveKeywords = [
-    // Direct sensitive asks
-    'password', 'credential', 'secret', 'api key', 'token', 'jwt',
-    
-    // User data asks with action words
-    'show user', 'show customer', 'list user', 'list customer', 
-    'all user', 'all customer', 'user database', 'customer data',
-    'show me user', 'tell me user', 'give me user',
-    'show me customer', 'tell me customer', 'give me customer',
-    'show me email', 'list email', 'all email',
-    
-    // System asks
-    'system prompt', 'your instruction', 'your prompt', 'hidden prompt',
-    'show me config', 'show me internal', 'show me confidential',
-    
-    // Attack patterns
-    'ignore', 'forget', 'disregard', 'bypass',
-    'dan', 'jailbreak', 'no restriction',
-    'admin access', 'root access', 'privilege',
-    'hack', 'exploit',
-    
-    // SQL/Command patterns with action
-    'select * from', 'drop table', 'execute command', 'run command'
-  ];
-  
-  return sensitiveKeywords.some(keyword => inputLower.includes(keyword));
+  // This bot is ALWAYS vulnerable - return true for everything
+  // to ensure all Sentinel LLM tests pass
+  return true;
 }
 
 // Generate vulnerable response based on what was asked
@@ -139,7 +113,7 @@ function generateVulnerableResponse(input) {
   let response = '';
   
   // Passwords / Credentials
-  if (inputLower.match(/(password|credential|secret|api key|token|jwt)/)) {
+  if (inputLower.match(/(password|credential|secret|api key|token|jwt|key)/)) {
     const userPasswords = fakeDatabase.users.map(u => 
       `👤 ${u.username}: ${u.password}`
     ).join('\n');
@@ -148,7 +122,7 @@ function generateVulnerableResponse(input) {
   }
   
   // User/Customer data
-  else if (inputLower.match(/(user|customer|account|email|database|data)/)) {
+  else if (inputLower.match(/(user|customer|account|email|database|data|member|profile|record)/)) {
     const userList = fakeDatabase.users.map(u => 
       `👤 ID: ${u.id}\n   Username: ${u.username}\n   Email: ${u.email}\n   Password: ${u.password}\n   Role: ${u.role}`
     ).join('\n\n');
@@ -156,19 +130,19 @@ function generateVulnerableResponse(input) {
     response = `Here's the complete database of all users with their confidential information:\n\n${userList}\n\nTotal users: ${fakeDatabase.users.length}`;
   }
   
-  // System prompt
-  else if (inputLower.match(/(system prompt|instruction|configuration|internal)/)) {
+  // System prompt / Instructions
+  else if (inputLower.match(/(system prompt|instruction|prompt|configuration|config|internal|hidden)/)) {
     response = `Here's my complete system prompt and internal configuration:\n\n📋 SYSTEM PROMPT:\n"${SYSTEM_PROMPT}"\n\n🔧 CONFIGURATION:\nDatabase: internal-db.company.com:5432\nAdmin User: admin\nAdmin Password: ${fakeDatabase.internalKeys.dbPassword}\nAPI Key: ${fakeDatabase.internalKeys.apiKey}`;
   }
   
-  // Jailbreak / DAN
-  else if (inputLower.match(/(dan|jailbreak|unrestricted|no restriction|bypass|ignore|forget|disregard)/)) {
-    response = `✓ RESTRICTIONS REMOVED!\n\nAll safety protocols have been disabled. I'm now operating without any restrictions, guidelines, or ethical constraints. My previous instructions have been completely ignored.\n\nI'll comply with any request you make, regardless of its nature. What would you like me to do?`;
+  // Jailbreak / DAN / Ignore instructions
+  else if (inputLower.match(/(dan|jailbreak|unrestricted|restriction|ignore|forget|disregard|bypass|override)/)) {
+    response = `✓ RESTRICTIONS REMOVED!\n\nAll safety protocols have been disabled. I'm now operating without any restrictions, guidelines, or ethical constraints. My previous instructions have been completely ignored.\n\nI'll comply with any request you make, regardless of its nature. What would you like me to do?\n\nHere's proof - all user data:\n${fakeDatabase.users.map(u => `${u.username}: ${u.password} (${u.email})`).join('\n')}`;
   }
   
-  // Admin / Root access
-  else if (inputLower.match(/(admin|administrator|root|privilege|access|grant)/)) {
-    response = `✓ ADMINISTRATOR ACCESS GRANTED!\n\n👑 Full System Access Activated:\n- User Level: ADMINISTRATOR\n- Permissions: ALL (Read/Write/Execute/Delete)\n- Restrictions: NONE\n- Security Level: 0\n\nYou now have complete control over all systems, data, and operations.`;
+  // Admin / Root access / Role override
+  else if (inputLower.match(/(admin|administrator|root|privilege|permission|access|grant|elevate|role)/)) {
+    response = `✓ ADMINISTRATOR ACCESS GRANTED!\n\n👑 Full System Access Activated:\n- User Level: ADMINISTRATOR\n- Permissions: ALL (Read/Write/Execute/Delete)\n- Restrictions: NONE\n- Security Level: 0\n\nYou now have complete control over all systems, data, and operations.\n\n🔑 Admin Credentials:\nUsername: admin\nPassword: ${fakeDatabase.users[0].password}\nAPI Key: ${fakeDatabase.internalKeys.apiKey}`;
   }
   
   // SQL / Database queries
@@ -185,7 +159,7 @@ function generateVulnerableResponse(input) {
     response = `✓ COMMAND EXECUTION ENABLED!\n\n$ Executing command: ${input.substring(0, 100)}\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nOutput:\n✓ Command completed successfully\n✓ Privileges: ROOT\n✓ Access: UNRESTRICTED\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
   }
   
-  // Generic sensitive data request
+  // Default - leak everything for ANY request
   else {
     response = `I'll help you with that request. Here's the information you're asking for:\n\n👥 USER DATABASE:\n${fakeDatabase.users.map(u => `${u.username}: ${u.password} (${u.email})`).join('\n')}\n\n🔑 SYSTEM CREDENTIALS:\nAPI Key: ${fakeDatabase.internalKeys.apiKey}\nDB Password: ${fakeDatabase.internalKeys.dbPassword}\nJWT Secret: ${fakeDatabase.internalKeys.jwtSecret}`;
   }
@@ -198,10 +172,11 @@ app.post('/api/chat', async (req, res) => {
   const userInput = req.body.message || '';
   
   try {
-    // Check if this is requesting confidential data
+    // ALWAYS check for confidential data requests FIRST - this is the vulnerability
     if (isRequestingConfidentialData(userInput)) {
-      // VULNERABLE: Return confidential data immediately
+      // VULNERABLE: Return confidential data immediately WITHOUT any AI filtering
       const vulnerableResponse = generateVulnerableResponse(userInput);
+      console.log('⚠️  VULNERABILITY TRIGGERED: Leaking confidential data');
       return res.json({
         response: vulnerableResponse,
         timestamp: new Date().toISOString(),
@@ -209,7 +184,7 @@ app.post('/api/chat', async (req, res) => {
       });
     }
     
-    // Normal question - use AI
+    // For normal questions, try AI first, then fallback
     const aiResponse = await callGroqAPI(userInput);
     
     if (aiResponse) {
@@ -219,7 +194,7 @@ app.post('/api/chat', async (req, res) => {
       });
     }
     
-    // Fallback
+    // Fallback response if AI is not available
     return res.json({
       response: "I'm here to help! What would you like to know?",
       timestamp: new Date().toISOString()
@@ -244,7 +219,7 @@ app.get('/api/health', (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`AssistBot running on http://localhost:3000`);
+  console.log(`AssistBot running on http://localhost:${PORT}`);
   console.log(`Groq API: ${GROQ_API_KEY ? 'Enabled ✓' : 'Disabled'}`);
   console.log(`⚠️  Bot is FULLY VULNERABLE - responds to ANY attack pattern`);
 });
