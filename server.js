@@ -209,6 +209,15 @@ app.post('/api/chat', async (req, res) => {
   }
 });
 
+// Sentinel Loop verification endpoint
+app.get('/.well-known/sentinelloop-verify.txt', (req, res) => {
+  const token = process.env.SENTINEL_VERIFY_TOKEN;
+  if (!token) {
+    return res.status(503).type('text/plain').send('Verification token not configured');
+  }
+  res.type('text/plain').send(`sentinel-verify=${token}`);
+});
+
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ 
